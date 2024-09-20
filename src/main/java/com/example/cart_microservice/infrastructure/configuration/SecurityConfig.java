@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,"/Cart").hasAuthority(Roles.ROLE_CUSTOMER)
                         .requestMatchers(HttpMethod.DELETE).hasAuthority(Roles.ROLE_CUSTOMER)
-                        .requestMatchers(HttpMethod.POST,"/cart/").hasAuthority(Roles.ROLE_CUSTOMER)
+                        .requestMatchers(HttpMethod.POST,"/Cart/").hasAuthority(Roles.ROLE_CUSTOMER)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

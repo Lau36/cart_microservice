@@ -1,7 +1,9 @@
 package com.example.cart_microservice.domain.ports.input;
 
+import com.example.cart_microservice.domain.models.Cart;
+
 public interface ICartUseCase {
-    String addCart();
+    Cart addCart(Cart cart);
     String deleteCart();
     String buy();
 }

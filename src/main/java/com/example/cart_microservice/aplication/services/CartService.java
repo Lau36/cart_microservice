@@ -1,5 +1,6 @@
 package com.example.cart_microservice.aplication.services;
 
+import com.example.cart_microservice.domain.models.Cart;
 import com.example.cart_microservice.domain.ports.input.ICartUseCase;
 
 public class CartService implements ICartUseCase {
@@ -10,8 +11,8 @@ public class CartService implements ICartUseCase {
     }
 
     @Override
-    public String addCart() {
-        return cartUseCase.addCart();
+    public Cart addCart(Cart cart) {
+        return cartUseCase.addCart(cart);
     }
 
     @Override

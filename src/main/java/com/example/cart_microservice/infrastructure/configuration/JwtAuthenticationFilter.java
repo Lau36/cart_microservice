@@ -39,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .getBody();
             String userName = claims.getSubject();
             String role = claims.get("role", String.class);
+            Long userId = claims.get("User_id", Long.class);
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
 
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
@@ -48,10 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            auth.setDetails(userId);
             SecurityContextHolder.getContext().setAuthentication(auth);
-
         }
         catch (Exception e) {
+            logger.error(Constants.FAILED + e.getMessage(), e);
             SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);

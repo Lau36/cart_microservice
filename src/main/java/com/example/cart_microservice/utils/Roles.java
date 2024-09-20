@@ -4,5 +4,5 @@ public class Roles {
     private Roles(){
 
     }
-    public static final String ROLE_CUSTOMER = "ROLE_Customer";
+    public static final String ROLE_CUSTOMER = "ROLE_Admin";
 }

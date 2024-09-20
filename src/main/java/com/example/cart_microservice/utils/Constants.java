@@ -11,4 +11,7 @@ public class Constants {
     public static final String ADD_CART = "Agregando items al carrito";
     public static final String DELETE_CART = "Eliminando items del carrito";
     public static final String BUY = "Comprando cosas";
+    public static final String FAILED = "Falló el proceso de JWT en: ";
+    public static final String CANNOT_ADD_ITEM_TO_CART_MESSAGE= "%s porque ya hay 3 articulos asociados a la misma categoria, revisa nuevamente";
+
 }
