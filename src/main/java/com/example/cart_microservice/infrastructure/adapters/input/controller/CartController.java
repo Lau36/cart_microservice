@@ -18,7 +18,7 @@ public class CartController {
     @PostMapping
     public ResponseEntity<Cart> createCart(@RequestParam Long itemId, @RequestParam Integer quantity) {
         Cart cart = addCartRequest.toCart(itemId, quantity);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addCart(cart));
+        return ResponseEntity.status(HttpStatus.OK).body(cartService.addCart(cart));
     }
     @DeleteMapping
     public ResponseEntity<String> deleteart() {

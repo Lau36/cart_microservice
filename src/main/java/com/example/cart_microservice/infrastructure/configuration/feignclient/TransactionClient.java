@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
-@FeignClient(name = "transaction", url = "http://localhost:6060/Supplies", configuration = FeingConfig.class)
+@FeignClient(name = "transaction", url = "http://localhost:7070/Supplies", configuration = FeingConfig.class)
 public interface TransactionClient {
     @GetMapping
     ResponseEntity<ResponseNextSupplyDate> getNextSupply(@RequestParam int itemId);

@@ -5,16 +5,16 @@ import java.time.LocalDateTime;
 
 public class Cart {
     private Long id;
-    private Long idUser;
+    private Long userId;
     private Long itemId;
     private Integer quantity;
     private LocalDateTime updatedAt;
     private String status;
     private Boolean deleted;
 
-    public Cart(Long id, Long idUser, Long itemId, Integer quantity, LocalDateTime updatedAt, String status, Boolean deleted) {
+    public Cart(Long id, Long userId, Long itemId, Integer quantity, LocalDateTime updatedAt, String status, Boolean deleted) {
         this.id = id;
-        this.idUser = idUser;
+        this.userId = userId;
         this.itemId = itemId;
         this.quantity = quantity;
         this.updatedAt = updatedAt;
@@ -26,11 +26,11 @@ public class Cart {
         return id;
     }
 
-    public Long getIdUser() {
-        return idUser;
+    public Long getUserId() {
+        return userId;
     }
 
-    public Long getIdItem() {
+    public Long getItemId() {
         return itemId;
     }
 
@@ -48,6 +48,10 @@ public class Cart {
 
     public Boolean getDeleted() {
         return deleted;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
