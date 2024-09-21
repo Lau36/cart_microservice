@@ -16,8 +16,8 @@ public class CartService implements ICartUseCase {
     }
 
     @Override
-    public String deleteCart() {
-        return cartUseCase.deleteCart();
+    public String deleteCart(Long itemId) {
+        return cartUseCase.deleteCart(itemId);
     }
 
     @Override

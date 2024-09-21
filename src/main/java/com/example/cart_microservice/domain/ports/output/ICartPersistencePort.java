@@ -11,6 +11,6 @@ public interface ICartPersistencePort {
     List<ItemCart> getAllItemsByUserId(Long userId);
     Optional<Cart> findItemCartByUserIdAndItemId(Long itemId, Long userId);
     Cart updateItemInCart(Cart cart);
-    String deleteCart();
+    String deleteCart(Long itemId, Long userId);
     String buy();
 }

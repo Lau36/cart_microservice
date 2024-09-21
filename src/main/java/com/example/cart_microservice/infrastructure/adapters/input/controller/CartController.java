@@ -21,9 +21,10 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(cartService.addCart(cart));
     }
     @DeleteMapping
-    public ResponseEntity<String> deleteart() {
-        return ResponseEntity.status(HttpStatus.OK).body(cartService.deleteCart());
+    public ResponseEntity<String> deleteItemInCart(@RequestParam Long itemId) {
+        return ResponseEntity.status(HttpStatus.OK).body(cartService.deleteCart(itemId));
     }
+
     @PostMapping("/")
     public ResponseEntity<String> buyCart() {
         return ResponseEntity.status(HttpStatus.OK).body(cartService.buy());

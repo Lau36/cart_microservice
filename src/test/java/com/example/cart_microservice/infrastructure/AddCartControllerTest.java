@@ -4,6 +4,7 @@ import com.example.cart_microservice.aplication.services.CartService;
 import com.example.cart_microservice.domain.models.Cart;
 import com.example.cart_microservice.infrastructure.adapters.input.controller.CartController;
 import com.example.cart_microservice.infrastructure.adapters.input.controller.mapper.AddCartRequest;
+import com.example.cart_microservice.infrastructure.utils.Status;
 import com.example.cart_microservice.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class AddCartControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        cart = new Cart(1L, 1L, itemId, quantity, LocalDateTime.now(), "ACTIVE", Boolean.FALSE);
+        cart = new Cart(1L, 1L, itemId, quantity, LocalDateTime.now(), Status.STANDBY.toString(), Boolean.FALSE);
         mockMvc = MockMvcBuilders.standaloneSetup(cartController).build();
     }
 
@@ -56,20 +57,21 @@ class AddCartControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itemId").value(itemId))
                 .andExpect(jsonPath("$.quantity").value(quantity))
-                .andExpect(jsonPath("$.status").value("ACTIVE"));
+                .andExpect(jsonPath("$.status").value(Status.STANDBY.toString()));
 
         verify(cartService, times(1)).addCart(any(Cart.class));
     }
 
     @Test
     void testDeleteCart() throws Exception {
-        when(cartService.deleteCart()).thenReturn(Constants.DELETE_CART);
+        when(cartService.deleteCart(itemId)).thenReturn(Constants.DELETE_CART);
 
-        mockMvc.perform(delete("/Cart"))
+        mockMvc.perform(delete("/Cart")
+                        .param("itemId", String.valueOf(itemId)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(Constants.DELETE_CART));
 
-        verify(cartService, times(1)).deleteCart();
+        verify(cartService, times(1)).deleteCart(itemId);
     }
 
     @Test
