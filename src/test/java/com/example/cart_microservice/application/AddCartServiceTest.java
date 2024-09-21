@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-class AssCartServiceTest {
+class AddCartServiceTest {
     @Mock
     ICartUseCase useCase;
 
@@ -23,11 +23,13 @@ class AssCartServiceTest {
     CartService service;
 
     private Cart cart;
+    private Long itemId;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        cart = new Cart(1L, 1L, 1L, 2, LocalDateTime.now(), "ACTIVE", Boolean.FALSE);
+        itemId = 1L;
+        cart = new Cart(1L, 1L, itemId, 2, LocalDateTime.now(), "ACTIVE", Boolean.FALSE);
     }
 
     @Test
@@ -40,10 +42,10 @@ class AssCartServiceTest {
 
     @Test
     void testDeleteCart(){
-        when(service.deleteCart()).thenReturn(Constants.DELETE_CART);
-        String result = service.deleteCart();
+        when(service.deleteCart(itemId)).thenReturn(Constants.DELETE_CART);
+        String result = service.deleteCart(itemId);
         assertEquals(Constants.DELETE_CART, result);
-        verify(useCase, times(1)).deleteCart();
+        verify(useCase, times(1)).deleteCart(itemId);
     }
 
     @Test

@@ -50,7 +50,13 @@ public class CartPersitenceAdapter implements ICartPersistencePort {
     }
 
     @Override
-    public String deleteCart() {
+    public String deleteCart(Long itemId, Long userId) {
+        Optional<CartEntity> itemInCart = cartRepository.findByItemIdAndUserId(itemId, userId);
+        itemInCart.ifPresent(cartEntity -> {
+                cartEntity.setDeleted(Boolean.TRUE);
+                cartEntity.setUpdatedAt(LocalDateTime.now());
+                cartRepository.save(cartEntity);
+        });
         return Constants.DELETE_CART;
     }
 

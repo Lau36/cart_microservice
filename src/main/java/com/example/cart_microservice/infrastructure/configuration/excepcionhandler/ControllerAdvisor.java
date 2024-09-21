@@ -1,9 +1,11 @@
 package com.example.cart_microservice.infrastructure.configuration.excepcionhandler;
 
 import com.example.cart_microservice.domain.exceptions.CannotAddItemToCart;
+import com.example.cart_microservice.domain.exceptions.NotFoundException;
 import com.example.cart_microservice.domain.exceptions.NotInStock;
 import com.example.cart_microservice.infrastructure.utils.InfrastructureConstants;
 import com.example.cart_microservice.utils.Constants;
+import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,5 +43,25 @@ public class ControllerAdvisor {
                 HttpStatus.BAD_REQUEST.toString(),
                 LocalDateTime.now()
         ));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleNotFoundException(NotFoundException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(
+                e.getMessage(),
+                HttpStatus.NOT_FOUND.toString(),
+                LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(RetryableException.class)
+    public ResponseEntity<ExceptionResponse> handleRetryableException(RetryableException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                new ExceptionResponse(
+                        Constants.ERROR_WITH_CONNECTION,
+                        HttpStatus.SERVICE_UNAVAILABLE.toString(),
+                        LocalDateTime.now()
+                )
+        );
     }
 }

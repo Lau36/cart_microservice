@@ -1,5 +1,6 @@
 package com.example.cart_microservice.domain;
 
+import com.example.cart_microservice.domain.exceptions.NotFoundException;
 import com.example.cart_microservice.domain.exceptions.NotInStock;
 import com.example.cart_microservice.domain.models.Cart;
 import com.example.cart_microservice.domain.models.ItemCart;
@@ -91,12 +92,32 @@ class AddCartUseCaseTest {
 
     @Test
     void testDeleteCart() {
-        when(cartPersistencePort.deleteCart()).thenReturn(Constants.DELETE_CART);
+        when(userIdPort.getUserId()).thenReturn(cart.getUserId());
+        when(cartPersistencePort.findItemCartByUserIdAndItemId(cart.getItemId(), cart.getUserId())).thenReturn(Optional.of(cart));
+        when(cartPersistencePort.deleteCart(cart.getItemId(), cart.getUserId())).thenReturn(Constants.DELETE_CART);
 
-        String result = cartUseCaseImpl.deleteCart();
+        String result = cartUseCaseImpl.deleteCart(cart.getItemId());
 
         assertEquals(Constants.DELETE_CART, result);
-        verify(cartPersistencePort).deleteCart();
+
+        verify(cartPersistencePort, times(1)).deleteCart(cart.getItemId(), cart.getUserId());
+        verify(cartPersistencePort, times(1)).findItemCartByUserIdAndItemId(cart.getItemId(), cart.getUserId());
+        verify(userIdPort, times(1)).getUserId();
+    }
+
+    @Test
+    void deleteCart_ItemNotFound() {
+        Long itemId = cart.getItemId();
+        when(userIdPort.getUserId()).thenReturn(cart.getUserId());
+
+        when(cartPersistencePort.findItemCartByUserIdAndItemId(cart.getItemId(), cart.getUserId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> cartUseCaseImpl.deleteCart(itemId));
+
+        verify(userIdPort).getUserId();
+        verify(cartPersistencePort).findItemCartByUserIdAndItemId(cart.getItemId(), cart.getUserId());
+        verify(cartPersistencePort, never()).deleteCart(anyLong(), anyLong());
     }
 
     @Test

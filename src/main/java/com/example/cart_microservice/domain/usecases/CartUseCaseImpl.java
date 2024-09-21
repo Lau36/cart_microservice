@@ -1,6 +1,7 @@
 package com.example.cart_microservice.domain.usecases;
 
 import com.example.cart_microservice.domain.exceptions.CannotAddItemToCart;
+import com.example.cart_microservice.domain.exceptions.NotFoundException;
 import com.example.cart_microservice.domain.exceptions.NotInStock;
 import com.example.cart_microservice.domain.models.Cart;
 import com.example.cart_microservice.domain.models.ItemCart;
@@ -39,13 +40,17 @@ public class CartUseCaseImpl implements ICartUseCase {
             Cart cartToUpdate = cartOptional.get();
             return processCartUpdate(cartToUpdate, cart.getQuantity());
         }
-        cartValidations(cart, userId);
+        addItemValidations(cart, userId);
         return cartPersistencePort.saveCart(cart);
     }
 
     @Override
-    public String deleteCart() {
-        return cartPersistencePort.deleteCart();
+    public String deleteCart(Long itemId) {
+        Long userId = userIdPort.getUserId();
+        if(cartPersistencePort.findItemCartByUserIdAndItemId(itemId, userId).isEmpty()) {
+            throw new NotFoundException(DomainConstans.NOT_FOUND);
+        }
+        return cartPersistencePort.deleteCart(itemId, userId);
     }
 
     @Override
@@ -76,7 +81,7 @@ public class CartUseCaseImpl implements ICartUseCase {
     }
 
     
-    private void cartValidations(Cart cart, Long userId) {
+    private void addItemValidations(Cart cart, Long userId) {
         notInStockValidation(cart);
 
         if(Boolean.FALSE.equals(canAddItemToCart(userId, cart.getItemId()))){
