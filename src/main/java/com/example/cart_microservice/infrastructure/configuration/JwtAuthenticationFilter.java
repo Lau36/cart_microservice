@@ -20,6 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+import static org.aspectj.weaver.tools.cache.SimpleCacheFactory.path;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String JWT_SECRET = System.getenv(Constants.TOKEN_KEY);
@@ -27,6 +29,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest  request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String token = getTokenFromRequest(request);
+
+        if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui") || path.startsWith("/swagger-ui.html") || path.startsWith("/webjars")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (token == null) {
             filterChain.doFilter(request, response);

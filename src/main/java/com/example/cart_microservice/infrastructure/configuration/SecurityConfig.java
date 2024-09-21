@@ -23,6 +23,12 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/webjars/**"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.POST,"/Cart").hasAuthority(Roles.ROLE_CUSTOMER)
                         .requestMatchers(HttpMethod.DELETE).hasAuthority(Roles.ROLE_CUSTOMER)
                         .requestMatchers(HttpMethod.POST,"/Cart/").hasAuthority(Roles.ROLE_CUSTOMER)
