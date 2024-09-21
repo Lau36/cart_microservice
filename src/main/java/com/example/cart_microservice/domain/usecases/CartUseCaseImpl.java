@@ -11,6 +11,9 @@ import com.example.cart_microservice.domain.ports.output.IStockClientPort;
 import com.example.cart_microservice.domain.ports.output.ITransactionClientPort;
 import com.example.cart_microservice.domain.ports.output.IUserId;
 import com.example.cart_microservice.domain.utils.DomainConstans;
+import com.example.cart_microservice.domain.utils.Paginated;
+import com.example.cart_microservice.domain.utils.Pagination;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -56,6 +59,12 @@ public class CartUseCaseImpl implements ICartUseCase {
     @Override
     public String buy() {
         return cartPersistencePort.buy();
+    }
+
+    @Override
+    public Paginated<Cart> getAllImtensInCart(Pagination pagination) {
+        Long userId = userIdPort.getUserId();
+        return cartPersistencePort.getAllImtensInCart(pagination,userId);
     }
 
     private Cart processCartUpdate(Cart cart, Integer quantity) {
