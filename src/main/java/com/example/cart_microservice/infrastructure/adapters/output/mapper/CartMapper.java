@@ -12,4 +12,5 @@ public interface CartMapper {
     Cart toCart(CartEntity cartEntity);
     CartEntity toCartEntity(Cart cart);
     List<ItemCart> toItemCarts(List<CartEntity> cartEntities);
+    List<Cart> toCarts(List<CartEntity> cartEntities);
 }

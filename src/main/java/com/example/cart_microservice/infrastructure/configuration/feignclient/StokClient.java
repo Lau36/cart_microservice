@@ -16,4 +16,7 @@ public interface StokClient {
 
     @GetMapping("/Categories")
     ResponseEntity<List<Long>> getCategoriesByItemId(@RequestParam int itemId);
+
+    @GetMapping("/Info")
+    ResponseEntity<List<Long>> getItemInfo(@RequestParam int itemId);
 }

@@ -3,10 +3,12 @@ package com.example.cart_microservice.infrastructure.adapters.output;
 import com.example.cart_microservice.domain.models.Cart;
 import com.example.cart_microservice.domain.models.ItemCart;
 import com.example.cart_microservice.domain.ports.output.ICartPersistencePort;
+import com.example.cart_microservice.domain.utils.ItemDTO;
 import com.example.cart_microservice.domain.utils.Paginated;
 import com.example.cart_microservice.domain.utils.Pagination;
 import com.example.cart_microservice.infrastructure.adapters.output.entity.CartEntity;
 import com.example.cart_microservice.infrastructure.adapters.output.mapper.CartMapper;
+import com.example.cart_microservice.infrastructure.adapters.output.mapper.ItemCartMapper;
 import com.example.cart_microservice.infrastructure.adapters.output.repository.CartRepository;
 import com.example.cart_microservice.infrastructure.utils.Status;
 import com.example.cart_microservice.utils.Constants;
@@ -27,6 +29,7 @@ public class CartPersitenceAdapter implements ICartPersistencePort {
 
     private final CartRepository cartRepository;
     private final CartMapper cartMapper;
+    private final ItemCartMapper itemCartMapper;
 
     @Override
     public Cart saveCart(Cart cart) {
@@ -68,9 +71,10 @@ public class CartPersitenceAdapter implements ICartPersistencePort {
 
     @Override
     public Paginated<Cart> getAllImtensInCart(Pagination pagination, Long userId) {
-        Sort sort = getSort(pagination.getSort(), pagination.getSortDirection().toString());
-        Pageable pageable = PageRequest.of(pagination.getPage(), pagination.getSize());
         List<CartEntity> cartEntities = cartRepository.findByUserId(userId);
+        List<Cart> cartList = cartMapper.toCarts(cartEntities);
+        List<ItemDTO> items = itemCartMapper.mapCartListToItemDTOList(cartList);
+        //Ahora falta llamar a stock pa ponerle a cada item su respectiva info
         return null;
     }
 
