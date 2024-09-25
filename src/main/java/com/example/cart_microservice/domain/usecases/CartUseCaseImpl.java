@@ -97,7 +97,9 @@ public class CartUseCaseImpl implements ICartUseCase {
         for(ItemCart item : itemsInCart) {
             List<Long> categoriesByItem = stockClientPort.getCategoriesByItemId(item.getItemId());
             for (Long categoryId : categoriesByItem) {
-                categoryCounts.put(categoryId, categoryCounts.getOrDefault(categoryId, 0) + 1);
+                categoryCounts.put(categoryId, categoryCounts.getOrDefault(categoryId, Integer.parseInt(DomainConstans.ZERO))
+                        +
+                        Integer.parseInt(DomainConstans.ONE));
             }
         }
         return categoryCounts;
@@ -108,7 +110,8 @@ public class CartUseCaseImpl implements ICartUseCase {
         List<Long> newItemCategories = stockClientPort.getCategoriesByItemId(itemId);
 
         for(Long newCategoryId : newItemCategories) {
-            if(categoryCounts.getOrDefault(newCategoryId, 0) >= 3) {
+            if(categoryCounts.getOrDefault(newCategoryId,  Integer.parseInt(DomainConstans.ZERO)) >=
+                    Integer.parseInt(DomainConstans.MAXIMUN_NUMBERS_OF_CATEGORIES)) {
                 return false;
             }
         }

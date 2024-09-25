@@ -6,4 +6,7 @@ public class DomainConstans {
 
     public static final String NOT_IN_STOCK = "No hay stock de ese articulo, la proxima fecha seria el: %s";
     public static final String CANNOT_ADD_ITEM_TO_CART_MESSAGE = "No se puede añadir el item al carrito";
+    public static final String ZERO = "0";
+    public static final String ONE = "1";
+    public static final String MAXIMUN_NUMBERS_OF_CATEGORIES = "3";
 }
