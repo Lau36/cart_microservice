@@ -11,6 +11,8 @@ import com.example.cart_microservice.infrastructure.adapters.TransactionClientAd
 import com.example.cart_microservice.infrastructure.adapters.UserIdAdapter;
 import com.example.cart_microservice.infrastructure.adapters.output.CartPersitenceAdapter;
 import com.example.cart_microservice.infrastructure.adapters.output.mapper.CartMapper;
+import com.example.cart_microservice.infrastructure.adapters.output.mapper.ItemCartMapper;
+import com.example.cart_microservice.infrastructure.adapters.output.mapper.ItemCartMapperImpl;
 import com.example.cart_microservice.infrastructure.adapters.output.repository.CartRepository;
 import com.example.cart_microservice.infrastructure.configuration.feignclient.StokClient;
 import com.example.cart_microservice.infrastructure.configuration.feignclient.TransactionClient;
@@ -37,6 +39,11 @@ public class BeanConfiguration {
     @Bean
     public ITransactionClientPort transactionClientPort(final TransactionClient transactionClient) {
         return new TransactionClientAdapter(transactionClient);
+    }
+
+    @Bean
+    public ItemCartMapper itemCartMapper() {
+        return new ItemCartMapperImpl();
     }
 
     @Bean

@@ -11,15 +11,16 @@ import com.example.cart_microservice.domain.ports.output.IStockClientPort;
 import com.example.cart_microservice.domain.ports.output.ITransactionClientPort;
 import com.example.cart_microservice.domain.ports.output.IUserId;
 import com.example.cart_microservice.domain.utils.DomainConstans;
-import com.example.cart_microservice.domain.utils.Paginated;
-import com.example.cart_microservice.domain.utils.Pagination;
-import org.springframework.data.domain.Sort;
+import com.example.cart_microservice.domain.utils.paginationitems.*;
+import com.example.cart_microservice.domain.utils.paginationitems.ItemsWithPrice;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CartUseCaseImpl implements ICartUseCase {
     private final ICartPersistencePort cartPersistencePort;
@@ -62,10 +63,90 @@ public class CartUseCaseImpl implements ICartUseCase {
     }
 
     @Override
-    public Paginated<Cart> getAllImtensInCart(Pagination pagination) {
+    public ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> getAllItemsInCart(ItemsInCartPaginationRequest pagination) {
         Long userId = userIdPort.getUserId();
-        return cartPersistencePort.getAllImtensInCart(pagination,userId);
+
+        List<ItemCart> items = cartPersistencePort.getAllItemsByUserId(userId);
+        List<Long> itemsId = items.stream().map(ItemCart::getItemId).toList();
+        ItemsRequest itemsRequest = new ItemsRequest(itemsId.stream().map(Long::intValue).toList());
+
+        PaginatedItemResponse itemsPaginated = paginatedItems(pagination, itemsRequest);
+
+        ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> itemsWithPrice = generateTotalPrice(itemsPaginated, items, itemsRequest);
+
+        return generateNextSupplyDate(itemsWithPrice);
     }
+
+    private ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> generateTotalPrice(PaginatedItemResponse paginatedItems, List<ItemCart> itemsInCart, ItemsRequest itemsRequest){
+        Map<Long, Integer> itemsMap = itemsInCart.stream().collect(Collectors.toMap(ItemCart::getItemId, ItemCart::getQuantity));
+
+        ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> addQuantityInCartToItemsPaginated = addQuantityInCart(paginatedItems, itemsMap);
+        BigDecimal totalPrice = new BigDecimal(0);
+
+        List<ItemsWithPrice> itemsWithPriceList = stockClientPort.getItemsWithPrice(itemsRequest);
+
+        for(ItemsWithPrice item : itemsWithPriceList){
+            if(itemsMap.containsKey(item.getId())){
+                BigDecimal total =  item.getPrice().multiply(BigDecimal.valueOf(itemsMap.get(item.getId())));
+                totalPrice = totalPrice.add(total);
+            }
+        }
+        addQuantityInCartToItemsPaginated.setTotalPrice(totalPrice);
+
+        return addQuantityInCartToItemsPaginated;
+    }
+
+    private ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> generateNextSupplyDate(ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> items){
+
+        for(ItemsWithNextSupplyDate item : items.getItems()){
+            if(item.getQuantityInCart() > item.getQuantityInStock() || item.getQuantityInStock() == 0){
+                item.setAreStock(Boolean.FALSE);
+                item.setNextSupplyDate(transactionClientPort.nextSupplyDate(item.getId()));
+            }
+        }
+        return items;
+    }
+
+    private ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> addQuantityInCart(PaginatedItemResponse paginatedItems, Map<Long, Integer> itemsMap){
+
+        ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> items = getItemsPaginated(paginatedItems);
+
+        for (ItemsWithNextSupplyDate item : items.getItems()){
+            if(itemsMap.containsKey(item.getId())){
+                item.setQuantityInCart(itemsMap.get(item.getId()));
+            }
+        }
+        return items;
+    }
+
+    private ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> getItemsPaginated(PaginatedItemResponse paginatedResponse){
+        List<ItemsWithNextSupplyDate> transformedItems = paginatedResponse.getItems().stream().map(item -> new ItemsWithNextSupplyDate(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                null,
+                item.getQuantityInStock(),
+                true,
+                null,
+                item.getPrice(),
+                item.getCategories(),
+                item.getBrand()
+        )).toList();
+
+        return new ItemsPaginatedWithPrice<>(
+                transformedItems,
+                null,
+                paginatedResponse.getCurrentPage(),
+                paginatedResponse.getTotalPages(),
+                paginatedResponse.getTotalElements()
+        );
+    }
+
+    private PaginatedItemResponse paginatedItems(ItemsInCartPaginationRequest paginationRequest, ItemsRequest itemsRequest) {
+        return stockClientPort.getPaginatedItems(paginationRequest, itemsRequest);
+    }
+
+
 
     private Cart processCartUpdate(Cart cart, Integer quantity) {
         if(Boolean.TRUE.equals(cart.getDeleted())){
@@ -122,7 +203,7 @@ public class CartUseCaseImpl implements ICartUseCase {
         List<Long> newItemCategories = stockClientPort.getCategoriesByItemId(itemId);
 
         for(Long newCategoryId : newItemCategories) {
-            if(categoryCounts.getOrDefault(newCategoryId, 0) >= 3) {
+            if(categoryCounts.getOrDefault(newCategoryId, 0) >= 3) { //Poner los numeros en constantes
                 return false;
             }
         }

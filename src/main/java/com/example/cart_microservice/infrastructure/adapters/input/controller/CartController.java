@@ -2,9 +2,16 @@ package com.example.cart_microservice.infrastructure.adapters.input.controller;
 
 import com.example.cart_microservice.aplication.services.CartService;
 import com.example.cart_microservice.domain.models.Cart;
+import com.example.cart_microservice.domain.utils.paginationitems.ItemsInCartPaginationRequest;
+import com.example.cart_microservice.domain.utils.paginationitems.ItemsPaginatedWithPrice;
+import com.example.cart_microservice.domain.utils.paginationitems.ItemsWithNextSupplyDate;
 import com.example.cart_microservice.infrastructure.adapters.input.controller.mapper.AddCartRequest;
+import com.example.cart_microservice.domain.utils.Filter;
+import com.example.cart_microservice.domain.utils.SortDirection;
 import com.example.cart_microservice.infrastructure.adapters.input.controller.utils.SwaggerConstants;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -65,5 +72,29 @@ public class CartController {
     @PostMapping("/")
     public ResponseEntity<String> buyCart() {
         return ResponseEntity.status(HttpStatus.OK).body(cartService.buy());
+    }
+
+    @Operation(summary = SwaggerConstants.GET_ALL_ITEMS, description = SwaggerConstants.GET_ALL_ITEMS_DESCRIPTION)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = SwaggerConstants.OK,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ItemsPaginatedWithPrice.class))),
+            @ApiResponse(responseCode = "400", description = SwaggerConstants.BAD_REQUEST_MESSAGE,
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = SwaggerConstants.NOT_FOUND,
+                    content = @Content),
+            @ApiResponse(responseCode = "503", description = SwaggerConstants.SERVICE_DOWN, content = @Content)
+    })
+    @GetMapping
+    public ResponseEntity<ItemsPaginatedWithPrice<ItemsWithNextSupplyDate>> getAll(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sortDirection,
+            @RequestParam String filter,
+            @RequestParam String filterName
+    ){
+        ItemsInCartPaginationRequest request = new ItemsInCartPaginationRequest(page,size, SortDirection.valueOf(sortDirection.toUpperCase()), Filter.valueOf(filter.toUpperCase()), filterName);
+        ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> items = cartService.getAllItemsInCart(request);
+        return ResponseEntity.status(HttpStatus.OK).body(items);
     }
 }

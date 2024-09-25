@@ -3,20 +3,12 @@ package com.example.cart_microservice.infrastructure.adapters.output;
 import com.example.cart_microservice.domain.models.Cart;
 import com.example.cart_microservice.domain.models.ItemCart;
 import com.example.cart_microservice.domain.ports.output.ICartPersistencePort;
-import com.example.cart_microservice.domain.utils.ItemDTO;
-import com.example.cart_microservice.domain.utils.Paginated;
-import com.example.cart_microservice.domain.utils.Pagination;
 import com.example.cart_microservice.infrastructure.adapters.output.entity.CartEntity;
 import com.example.cart_microservice.infrastructure.adapters.output.mapper.CartMapper;
-import com.example.cart_microservice.infrastructure.adapters.output.mapper.ItemCartMapper;
 import com.example.cart_microservice.infrastructure.adapters.output.repository.CartRepository;
 import com.example.cart_microservice.infrastructure.utils.Status;
 import com.example.cart_microservice.utils.Constants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -29,7 +21,6 @@ public class CartPersitenceAdapter implements ICartPersistencePort {
 
     private final CartRepository cartRepository;
     private final CartMapper cartMapper;
-    private final ItemCartMapper itemCartMapper;
 
     @Override
     public Cart saveCart(Cart cart) {
@@ -70,28 +61,9 @@ public class CartPersitenceAdapter implements ICartPersistencePort {
     }
 
     @Override
-    public Paginated<Cart> getAllImtensInCart(Pagination pagination, Long userId) {
-        List<CartEntity> cartEntities = cartRepository.findByUserId(userId);
-        List<Cart> cartList = cartMapper.toCarts(cartEntities);
-        List<ItemDTO> items = itemCartMapper.mapCartListToItemDTOList(cartList);
-        //Ahora falta llamar a stock pa ponerle a cada item su respectiva info
-        return null;
-    }
-
-    @Override
     public String buy() {
         return Constants.BUY;
     }
 
-    private Sort getSort(String sort, String direction) {
-        if(sort.equals("itemName")){
-            return Sort.by(Sort.Direction.fromString(direction), "items.name");
-
-        }
-        else{
-            return Sort.by(Sort.Direction.fromString(direction), sort);
-        }
-
-    }
 
 }

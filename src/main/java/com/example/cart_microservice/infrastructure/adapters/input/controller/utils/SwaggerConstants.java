@@ -17,5 +17,10 @@ public class SwaggerConstants {
     public static final String BAD_REQUEST = "Solicitud incorrecta";
     public static final String NOT_FOUND = "No se encontró el articulo para eliminar";
     public static final String BEARER_TOKEN = "bearerAuth";
-    public static final String SERVICE_DOWN = "Ocurrió un error de conexión con algún microservicio";
+    public static final String SERVICE_DOWN = "Ocurrió un error de conexión con algún microservicio";;
+    public static final String GET_ALL_ITEMS = "Obtener todos items paginados";
+    public static final String GET_ALL_ITEMS_DESCRIPTION = "Recuperar una lista paginada de los artículos del carrito con su próxima fecha de suministro y su precio total.";
+    public static final String OK = "Todo bien";
+    public static final String BAD_REQUEST_MESSAGE = "Los valores son invalidos";
+
 }

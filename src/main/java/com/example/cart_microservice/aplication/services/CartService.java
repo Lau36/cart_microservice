@@ -2,8 +2,9 @@ package com.example.cart_microservice.aplication.services;
 
 import com.example.cart_microservice.domain.models.Cart;
 import com.example.cart_microservice.domain.ports.input.ICartUseCase;
-import com.example.cart_microservice.domain.utils.Paginated;
-import com.example.cart_microservice.domain.utils.Pagination;
+import com.example.cart_microservice.domain.utils.paginationitems.ItemsInCartPaginationRequest;
+import com.example.cart_microservice.domain.utils.paginationitems.ItemsPaginatedWithPrice;
+import com.example.cart_microservice.domain.utils.paginationitems.ItemsWithNextSupplyDate;
 
 public class CartService implements ICartUseCase {
     private final ICartUseCase cartUseCase;
@@ -28,7 +29,7 @@ public class CartService implements ICartUseCase {
     }
 
     @Override
-    public Paginated<Cart> getAllImtensInCart(Pagination pagination) {
-        return cartUseCase.getAllImtensInCart(pagination);
+    public ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> getAllItemsInCart(ItemsInCartPaginationRequest pagination) {
+        return cartUseCase.getAllItemsInCart(pagination);
     }
 }

@@ -10,6 +10,10 @@ import com.example.cart_microservice.domain.ports.output.ITransactionClientPort;
 import com.example.cart_microservice.domain.ports.output.IUserId;
 import com.example.cart_microservice.domain.usecases.CartUseCaseImpl;
 import com.example.cart_microservice.domain.utils.DomainConstans;
+import com.example.cart_microservice.domain.utils.Filter;
+import com.example.cart_microservice.domain.utils.SortDirection;
+import com.example.cart_microservice.domain.utils.paginationitems.*;
+import com.example.cart_microservice.infrastructure.adapters.input.controller.dto.request.PaginationRequest;
 import com.example.cart_microservice.infrastructure.utils.Status;
 import com.example.cart_microservice.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +30,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class AddCartUseCaseTest {
+class CartUseCaseTest {
     @Mock
     private ICartPersistencePort cartPersistencePort;
 
@@ -165,7 +170,84 @@ class AddCartUseCaseTest {
         when(stockClientPort.getCategoriesByItemId(cart.getItemId())).thenReturn(List.of(1L));
 
         assertDoesNotThrow(() -> cartUseCaseImpl.addCart(cart));
+    }
 
+    @Test
+    void testGetAllItemsInCart() {
+
+        Long userId = 1L;
+        when(userIdPort.getUserId()).thenReturn(userId);
+
+        // Mock cart items
+        List<ItemCart> itemsInCart = List.of(
+                new ItemCart(Status.STANDBY.toString(), 1L, LocalDateTime.now(), 2),
+                new ItemCart(Status.STANDBY.toString(), 2L, LocalDateTime.now(), 2)
+        );
+        when(cartPersistencePort.getAllItemsByUserId(userId)).thenReturn(itemsInCart);
+
+        // Mock paginated items
+        List<ItemResponseDTO> itemResponses = List.of(
+                new ItemResponseDTO(
+                        1L,
+                        "Item 1",
+                        "Description 1",
+                        5,
+                        BigDecimal.TEN,
+                        List.of(new NameIdDTO(1L, "Categoria 1"), new NameIdDTO(2L, "Categoria 2")),
+                        new NameIdDTO(1L, "Apple")),
+                new ItemResponseDTO(
+                        2L,
+                        "Item 2",
+                        "Description 2",
+                        0,
+                        BigDecimal.valueOf(20),
+                        List.of(new NameIdDTO(1L, "Categoria 1"), new NameIdDTO(2L, "Categoria 2")),
+                        new NameIdDTO(1L, "Apple"))
+
+        );
+        PaginatedItemResponse paginatedResponse = new PaginatedItemResponse(itemResponses, 0, 1, 2);
+
+        ItemsInCartPaginationRequest paginationRequest = new ItemsInCartPaginationRequest(0, 2, SortDirection.ASC, Filter.CATEGORYNAME, "Electronicos");
+        ItemsRequest itemsRequest = new ItemsRequest(List.of(1, 2));
+
+        when(stockClientPort.getPaginatedItems(any(ItemsInCartPaginationRequest.class), any(ItemsRequest.class))).thenReturn(paginatedResponse);
+
+        List<ItemsWithPrice> itemsWithPriceList = List.of(
+                new ItemsWithPrice(1L, BigDecimal.TEN),
+                new ItemsWithPrice(2L, BigDecimal.valueOf(20))
+        );
+        when(stockClientPort.getItemsWithPrice(any(ItemsRequest.class))).thenReturn(itemsWithPriceList);
+
+
+        LocalDateTime nextSupplyDate = LocalDateTime.now();
+
+        // Mock next supply date
+        when(transactionClientPort.nextSupplyDate(2L)).thenReturn(nextSupplyDate);
+
+
+        ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> result = cartUseCaseImpl.getAllItemsInCart(paginationRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getItems().size());
+        assertEquals(BigDecimal.valueOf(60), result.getTotalPrice());
+
+        ItemsWithNextSupplyDate item1 = result.getItems().get(0);
+        assertEquals(1L, item1.getId());
+        assertEquals(2, item1.getQuantityInCart());
+        assertTrue(item1.getAreStock());
+
+        ItemsWithNextSupplyDate item2 = result.getItems().get(1);
+        assertEquals(2L, item2.getId());
+        assertEquals(2, item2.getQuantityInCart());
+        assertFalse(item2.getAreStock());
+        assertEquals(nextSupplyDate, item2.getNextSupplyDate());
+
+        verify(userIdPort, times(1)).getUserId();
+        verify(cartPersistencePort, times(1)).getAllItemsByUserId(userId);
+        verify(stockClientPort, times(1)).getPaginatedItems(any(ItemsInCartPaginationRequest.class), any(ItemsRequest.class));
+        verify(stockClientPort, times(1)).getItemsWithPrice(any(ItemsRequest.class));
+        verify(transactionClientPort, times(1)).nextSupplyDate(2L);
     }
 
 }
