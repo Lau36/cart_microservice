@@ -22,8 +22,6 @@ public interface StokClient{
     @GetMapping("/Categories")
     ResponseEntity<List<Long>> getCategoriesByItemId(@RequestParam int itemId);
 
-    @GetMapping("/Info")
-    ResponseEntity<List<Long>> getItemInfo(@RequestParam int itemId);
 
     @GetMapping("/ItemsPaginated/")
     ResponseEntity<PaginatedItemResponse> getItemsPaginated(@RequestParam(defaultValue = "0")@Min(0) int page,

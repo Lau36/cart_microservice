@@ -16,10 +16,7 @@ import com.example.cart_microservice.domain.utils.paginationitems.ItemsWithPrice
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CartUseCaseImpl implements ICartUseCase {
@@ -81,7 +78,7 @@ public class CartUseCaseImpl implements ICartUseCase {
         Map<Long, Integer> itemsMap = itemsInCart.stream().collect(Collectors.toMap(ItemCart::getItemId, ItemCart::getQuantity));
 
         ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> addQuantityInCartToItemsPaginated = addQuantityInCart(paginatedItems, itemsMap);
-        BigDecimal totalPrice = new BigDecimal(0);
+        BigDecimal totalPrice = new BigDecimal(DomainConstans.ZERO);
 
         List<ItemsWithPrice> itemsWithPriceList = stockClientPort.getItemsWithPrice(itemsRequest);
 
@@ -99,7 +96,7 @@ public class CartUseCaseImpl implements ICartUseCase {
     private ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> generateNextSupplyDate(ItemsPaginatedWithPrice<ItemsWithNextSupplyDate> items){
 
         for(ItemsWithNextSupplyDate item : items.getItems()){
-            if(item.getQuantityInCart() > item.getQuantityInStock() || item.getQuantityInStock() == 0){
+            if(item.getQuantityInCart() > item.getQuantityInStock() || Objects.equals(item.getQuantityInStock(), DomainConstans.ZERO)){
                 item.setAreStock(Boolean.FALSE);
                 item.setNextSupplyDate(transactionClientPort.nextSupplyDate(item.getId()));
             }
